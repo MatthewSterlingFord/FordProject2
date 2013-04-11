@@ -1,0 +1,181 @@
+Parameter Settings for Project 2 - Tommy the Terp
+-------------------------------------------------
+
+This file contains various numeric parameter settings used in our
+project. None of these are requirements. While you are welcome to use
+these values in your program, you are encouraged to experiment with
+different settings as well. (Unlike external sources, it is not
+necessary to acknowledge your use of these in your ReadMe file.)
+
+If any values appear to be missing, feel free to check with me.
+
+Dave
+
+-----------------------------------------------------------------------
+
+Program Inputs:
+---------------
+
+  Terp:
+  ------
+    'w' or UP arrow: move terp forwards
+    's' or DOWN arrow: move terp backwards (only in aerial mode)
+    'a' or LEFT arrow: turn terp to the left
+    'd' or RIGHT arrow: turn terp to the right
+
+  Other:
+  ------
+    'q' or 'ESC': quit
+    'f': toggle full screen
+
+Camera:
+-------
+  There are three camera modes, Aerial, Following, and First-Person. The
+  following values are common to all the cameras:
+
+  Fov-Y = 30
+  Near clipping plane = 50
+  Far clipping plane = 100000
+
+  Aerial:
+    Is positioned south of the terp by 5000 units and 5000 units above
+    the ground.
+
+  Following:
+    Follows the terp at a distance of 3000 units behind and 1500 units
+    above the ground. The camera generally faces the same way as the
+    terp, but for the sake of smooth camera movement, if the terp turns
+    the camera turns at a rate of at most 120 degrees per second until
+    it catches up.
+
+  First-Person:
+    The camera is located on the top of the terp's head and faces the
+    same direction as the terp.
+
+World:
+------
+The ground is a rectangular platform that sits within an ocean (a huge
+blue horizontal square) and is surrounded by a texture-mapped sky box.
+
+The ground is rendered as a 50 x 50 grid of squares, which cover a
+region that is 5000 x 5000 centered at the origin. The shifting marquee
+pattern is based on a procedural texture, and changes over time. In
+particular, I compute distance of a square from the origin and add in
+the number of seconds since the start of the game and take this quantity
+mod 20. I use this as an index into a 20 element of array. Each element
+of this array is an index from 0 to 3, which selects the color (white,
+black, red, yellow).
+
+  Ground diffuse and ambient colors (RGBA values)
+    (1.00, 1.00, 1.00, 1)    white
+    (0.50, 0.50, 0.50, 1)    gray
+    (1.00, 0.50, 0.50, 1)    light red
+    (1.00, 1.00, 0.40, 1)    light yellow
+  
+  Ground specular color: (RGBA)
+    (0.25, 0.25, 0.25) shininess = 100.0
+    
+  Ocean:
+    Ocean size: 20000 x 2000 units square
+    Color (RGBA): (0, 0.5, 0.8, 1) (not that lighting is not applied)
+
+  Skybox:
+    The skybox is a half-cube that is 10,000 units wide on each side. It
+    is texture mapped with the image skybox.bmp (which we have provided
+    to you).
+
+  Lights:
+  -------
+    0: position: (-5, -5, 10, 0)
+       color: (1, 1, 1)
+       attenuation: a=1, b=0, c=0
+  
+    1: position: placed 500 units above terp
+       color: (30, 30, 30)
+       attenuation: a=0, b=0, c=0.001
+  
+    2: position: (300, -1700, 300, 1)
+       color: (30, 30, 30)
+       attenuation: a=0, b=0, c=0.0005
+
+Terp:
+-----
+  initial position = (0, 0, 0)
+  initial direction of motion = along the +y axis
+
+  diffuse color = (0.45, 0.80, 1) (light blue)
+  specular color = (0.25, 0.25, 0.25)
+  shininess = 100
+
+  Terp motion:
+  ------------
+  The terp's motion is defined internally by two variables:
+
+   - heading: indicates the terp's walking direction, which is given in
+        degrees relative to the x-axis
+   - horizontal speed: indicates the terp's walking speed, in units per
+        second
+  
+  If no inputs are recieved, the terp slows down by applying a
+  frictional force. Whenever a WASD key is hit, the terp responds either
+  by changing its heading, speed, or both. How the terp behaves depends
+  on the camera state:
+
+    Aerial:
+	-------
+      The WASD keys each apply an impulse that sets the terp's
+      speed to 800 units per second. The heading is adjusted according
+      to the key (W = 90, A = 180, S = 270, D = 0).
+
+    Following or First-person:
+	--------------------------
+      If the W key is hit, the horizontal speed is set to 800 units per
+      second. If the S key is hit, the speed is set to 0. In either
+      case, the heading is not changed. 
+
+      If the A or D keys are hit, the heading is incremented or
+      decremented by 10 degrees. The speed is not changed.
+
+Terp body:
+----------
+  Skeletal structure:
+  -------------------
+    The body's frame is located at ground level between its feet, with:
+      x - points right
+      y - points forward
+      z - points up
+
+    The body consists of a collection of ellipsoids. The "Dimension" values
+    below are the x, y, and z radii of these ellipsoids. We apply an
+    appropriate scaling, and then draw a sphere (using glutSolidSphere).
+
+    Body: (root)
+      Torso:
+        Offset: (0, 0, 100), Rotation: none, Dimensions: (30, 60, 80)
+      Head:
+        Offset: (20, 0, 110), Rotation: none, Dimensions: (50, 30, 30)
+      Left-Arm:
+        Offset: (0, 60, 40), Rotation: 30 degrees about x, Dimensions: (20, 20, 40)
+      Right-Arm:
+        Offset: (0, -60, 40), Rotation: -30 degrees about x, Dimensions: (20, 20, 40)
+      Left-Leg:
+        Offset: (0, 20, -60), Rotation: 45 degrees about x, Dimensions: (20, 20, 30)
+      Right-Leg:
+        Offset: (0, -20, -60), Rotation: -45 degrees about x, Dimensions: (20, 20, 30)
+
+  Animation:
+  ----------
+    We use a procedural animation to move the arms and legs. The timing is
+    based on a variable, cadence, which is updated according to the distance
+    traveled. This way, the faster the terp moves, the faster his arms and legs
+    move. The motion of the various joints is based on a sine function applied
+    to the cadence (with appropriate scaling factors so the speed looks
+    reasonable). In addition, the body itself wobbles side to side slightly.
+  
+  Shadow:
+  -------
+    We generate a simple "fake" shadow below the terp. This is done by
+    redrawing applying a transformation that scales the terp onto the
+    ground (scale by (1, 1, 0)), then translate it up just slightly, so
+    it lies a bit above the ground. Then it is drawn in dark gray with
+    lighting disabled.
